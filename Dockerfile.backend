@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim
+
+# Set environment flags
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DISABLE_SQLALCHEMY_CEXT=1 \
+    SAFETY_UPLOAD_DIR=/app/private_uploads
+
+WORKDIR /app
+
+# Install system dependencies for build and health check
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python backend dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend application files
+COPY app.py database.py models.py file_storage.py import_historical_dataset.py alembic.ini ./
+COPY migrations ./migrations
+COPY saved_models ./saved_models
+COPY safety_incidents_cleaned.csv ./safety_incidents_cleaned.csv
+
+# Copy NLP extractor services referenced by backend
+COPY safety_incident_ui/services ./safety_incident_ui/services
+
+# Ensure upload directory exists
+RUN mkdir -p /app/private_uploads
+
+EXPOSE 8502
+
+# Health check verifies API responsiveness and model loading
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8502/health || exit 1
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8502"]
+

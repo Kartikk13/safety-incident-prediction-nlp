@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: safety_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-safety_incident_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_secure_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - safety_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: safety_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-safety_incident_db}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres_secure_pass}
+      SAFETY_UPLOAD_DIR: /app/private_uploads
+      DISABLE_SQLALCHEMY_CEXT: "1"
+      CORS_ORIGINS: "http://localhost:8501,http://127.0.0.1:8501,http://frontend:8501"
+    ports:
+      - "8502:8502"
+    volumes:
+      - private_uploads:/app/private_uploads
+    networks:
+      - safety_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: safety_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      SAFETY_API_URL: http://backend:8502
+      SAFETY_DEMO_MODE: "false"
+    ports:
+      - "8501:8501"
+    networks:
+      - safety_network
+
+volumes:
+  pgdata:
+    name: safety_pgdata
+  private_uploads:
+    name: safety_private_uploads
+
+networks:
+  safety_network:
+    name: safety_network
+

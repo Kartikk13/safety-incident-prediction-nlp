@@ -1,0 +1,64 @@
+services:
+  - type: web
+    name: safety-incident-backend
+    runtime: docker
+    dockerfilePath: Dockerfile.backend
+    plan: starter # Minimum 1 GB RAM required to prevent CatBoost OOM
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: safety-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: safety-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: safety-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: safety-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: safety-postgres
+          property: password
+      - key: DISABLE_SQLALCHEMY_CEXT
+        value: "1"
+      - key: SAFETY_UPLOAD_DIR
+        value: /app/private_uploads
+      - key: STORAGE_BACKEND
+        value: local
+      - key: CORS_ORIGINS
+        value: "*"
+    disk:
+      name: private-uploads-disk
+      mountPath: /app/private_uploads
+      sizeGB: 5
+
+  - type: web
+    name: safety-incident-frontend
+    runtime: docker
+    dockerfilePath: Dockerfile.frontend
+    plan: starter # Minimum 1 GB RAM required for Streamlit + PyTorch/SentenceTransformers
+    region: oregon
+    healthCheckPath: /_stcore/health
+    envVars:
+      - key: SAFETY_API_URL
+        fromService:
+          type: web
+          name: safety-incident-backend
+          property: url
+      - key: SAFETY_DEMO_MODE
+        value: "false"
+
+databases:
+  - name: safety-postgres
+    plan: starter # Paid starter tier required to prevent 30-day deletion and data loss
+    postgresMajorVersion: 15
+    region: oregon
+

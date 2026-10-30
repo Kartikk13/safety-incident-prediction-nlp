@@ -1,0 +1,37 @@
+# Git and IDE
+.git/
+.gitignore
+.gemini/
+.idea/
+.vscode/
+
+# Virtual Environments
+.venv/
+safety_incident_ui/.venv/
+env/
+venv/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local uploads and logs
+private_uploads/
+migrations/private_uploads/
+catboost_info/
+*.log
+*.bak
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+SyntheticDtst.ipynb
+
