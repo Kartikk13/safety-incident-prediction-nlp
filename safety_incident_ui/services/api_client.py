@@ -20,8 +20,29 @@ import streamlit as st
 
 from data import mock_data
 
-API_URL = os.getenv("SAFETY_API_URL", "http://127.0.0.1:8502").rstrip("/")
-IS_DEMO_MODE = os.getenv("SAFETY_DEMO_MODE", "0").lower() in ("1", "true", "yes") or API_URL == "demo"
+def get_config(key, default):
+    value = os.getenv(key)
+
+    if value:
+        return value
+
+    try:
+        return st.secrets.get(key, default)
+    except Exception:
+        return default
+
+
+API_URL = str(get_config(
+    "SAFETY_API_URL",
+    "http://127.0.0.1:8502"
+)).rstrip("/")
+
+IS_DEMO_MODE = (
+    str(get_config("SAFETY_DEMO_MODE", "0")).lower()
+    in ("1", "true", "yes")
+    or API_URL == "demo"
+)
+
 USE_MOCK = IS_DEMO_MODE
 
 # Pipeline stages for UI progress display
