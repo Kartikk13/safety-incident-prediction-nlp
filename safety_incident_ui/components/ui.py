@@ -112,8 +112,7 @@ def login_view() -> None:
                 else:
                     st.session_state["user"] = {"name": name.strip(), "role": "analyst" if role.startswith("Safety") else "user"}
                     st.rerun()
-        st.caption("Demo sign-in placeholder. Real authentication will be handled by the backend API.")
-
+       
 
 def factor_columns(ex: dict) -> None:
     cols = st.columns(4)
