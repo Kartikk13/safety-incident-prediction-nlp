@@ -12,6 +12,7 @@ WORKDIR /app
 # Install system dependencies for build and health check
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python backend dependencies
