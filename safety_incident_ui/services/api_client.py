@@ -225,7 +225,7 @@ def analyze_incident(text: str, on_stage=None) -> dict:
     payload = {
         "incident_description": text.strip(),
         "original_report_text": text.strip(),
-        "submission_method": "direct_analysis",
+        "submission_method": "paste",
     }
     result = predict_incident(payload)
     incident_id = result.get("incident_id")
