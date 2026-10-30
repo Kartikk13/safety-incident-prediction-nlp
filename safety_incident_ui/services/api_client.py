@@ -188,7 +188,7 @@ def list_incidents(
             })
 
         df = pd.DataFrame(records)
-        df["date"] = pd.to_datetime(df["date"])
+        df["date"] = pd.to_datetime(df["date"], errors="coerce", utc=True)
         return df
 
     except requests.exceptions.ConnectionError as exc:
