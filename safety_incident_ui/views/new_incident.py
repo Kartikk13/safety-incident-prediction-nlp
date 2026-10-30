@@ -10,8 +10,6 @@ import streamlit as st
 
 from datetime import datetime
 
-from hybrid_nlp_prototype import extract_hybrid_features
-
 
 ui.page_header("New incident analysis", "Provide an incident report and the system will extract key details, suggest probable root causes, and compare with history.")
 ui.demo_notice()
@@ -173,6 +171,7 @@ if analyze_clicked or short_form_submitted:
                 # 3. Confident semantic matching
                 # 4. Conservative fallback (None)
                 try:
+                    from hybrid_nlp_prototype import extract_hybrid_features
                     hybrid = extract_hybrid_features(text)
                     for field in (
                         "equipment_type",
