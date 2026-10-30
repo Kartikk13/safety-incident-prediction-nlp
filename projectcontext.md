@@ -1102,3 +1102,51 @@ safety_incident_ui\.venv\Scripts\python.exe -m pytest safety_incident_ui/tests/t
    - On a single VPS, container updates incur a brief **~10–15 second** cutover downtime, which is acceptable for this application's operational SLA.
 5. **Database Rollback Precautions**:
    - Executing `alembic downgrade` in production after user incidents have been recorded carries a severe risk of dropping columns or tables containing user data. Production schema changes must always be additive.
+
+
+---
+
+## 15. GitHub Repository Preparation & Sanitization — 2026-10-30
+
+### 15.1 Sanitization & Cleanup Log
+
+A comprehensive project inspection and safe sanitization was completed prior to publishing to GitHub:
+
+1. **Conclusively Disposable Files Removed**:
+   - `catboost_info/` directory: Removed training run event logs and temporary error tables.
+   - `.ipynb_checkpoints/` directory: Removed stale Jupyter checkpoints.
+   - `safety_incident_ui/hybrid_nlp_prototype.py.preintegration.bak`: Removed obsolete pre-integration backup.
+   - `safety_incident_ui/views/new_incident.py.prehybrid.bak`: Removed obsolete pre-hybrid backup.
+   - `test_upload_20261024.txt`: Removed temporary local test upload artifact.
+   - `__pycache__/` and `.pytest_cache/`: Cleaned across all application and UI directories.
+
+2. **Files Preserved for User Review (Proposed Cleanup List)**:
+   - `safety_incidents_synthetic_raw.csv` (8.02 MB): Raw synthetic baseline dataset. Not imported by runtime code; preserved for dataset provenance and research verification.
+   - `SyntheticDtst.ipynb` (548 KB): Jupyter notebook documenting synthetic data generation and CatBoost model training. Preserved for training reproducibility.
+
+3. **Strict Invariants Preserved**:
+   - All machine learning models in `saved_models/` (`risk_level_pipeline.joblib`, `root_cause_category_pipeline.joblib`, `severity_level_pipeline.joblib`) preserved.
+   - Cleaned historical dataset `safety_incidents_cleaned.csv` preserved.
+   - All Alembic migrations in `migrations/versions/` preserved.
+   - All tests, UI views, API services, and deployment manifests preserved.
+
+### 15.2 Security Audit Findings
+
+- **Zero Committed Secrets**: The repository was initialized cleanly. No historical commits existed prior to this initialization.
+- **Environment & Credentials**: Local `.env` file containing local database credentials is strictly excluded via `.gitignore`. The safe placeholder template `.env.example` is tracked.
+- **Private Incident Uploads**: All local test upload directories (`private_uploads/`, `migrations/private_uploads/`) are strictly excluded via `.gitignore`.
+- **Secret Scanning**: Automated regex scan across all tracked files identified zero exposed API keys, private certificates, or database credentials.
+- **Virtual Environments**: Both root `.venv` and `safety_incident_ui/.venv` are strictly excluded from version control.
+
+### 15.3 Repository Artifacts Created
+
+- **[`README.md`](file:///D:/HCL-Safety-Project/README.md)**: Industry-grade documentation covering architecture, tech stack, installation, environment variables, database migrations, running the app, ML/NLP explanations, testing commands, deployment blueprints, and license recommendations.
+- **[`.gitignore`](file:///D:/HCL-Safety-Project/.gitignore)**: Comprehensive exclusion rules covering security tokens, virtual environments, private uploads, database dumps, cache folders, and OS artifacts.
+- **[`docs/images/README.md`](file:///D:/HCL-Safety-Project/docs/images/README.md)**: Directory placeholder for production UI screenshots.
+
+### 15.4 Git State & Commit Information
+
+- **Branch**: `main`
+- **Initial Commit Hash**: `ef6ab99` (`ef6ab9989f5ca2cee3634f69c50d4517ad0e3802`)
+- **Tracked Files**: 62 application, configuration, dataset, model, and documentation files.
+- **Target Remote**: `safety-incident-prediction-nlp` (PUBLIC)
